@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import io.github.cdimascio.dotenv.dotenv
 
 var urls: Urls = Urls("https://images.unsplash.com/photo-1640984342197-ef90c8ee2974?ixid=MnwyODExMTh8MHwxfHJhbmRvbXx8fHx8fHx8fDE2NDE5MDgwNzU&ixlib=rb-1.2.1",
     "https://images.unsplash.com/photo-1640984342197-ef90c8ee2974?crop=entropy&cs=srgb&fm=jpg&ixid=MnwyODExMTh8MHwxfHJhbmRvbXx8fHx8fHx8fDE2NDE5MDgwNzU&ixlib=rb-1.2.1&q=85",
@@ -56,8 +57,11 @@ class ImageClass (): ViewModel() {
         isLoading.postValue(true)
 
         viewModelScope.launch() {
+            val env = System.getenv("config")
+
+            println(env)
             val call = getRetrofit().create(APIService::class.java)
-                .getRandomImage("random?client_id=${Constants.client_id}&count=${Constants.count}")
+                .getRandomImage("random?client_id=okTUdfxNZJjAmiu8sirizJSXu9_1hfOiEtNyaAbyqGk&count=${Constants.count}")
             val imageAux = call.body()
             if (call.isSuccessful) {
 

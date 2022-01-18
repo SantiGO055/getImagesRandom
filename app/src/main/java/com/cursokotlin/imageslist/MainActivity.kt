@@ -25,6 +25,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.State
 import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.bumptech.glide.load.engine.Resource
 import com.cursokotlin.imageslist.Model.ImageClass
@@ -32,6 +35,9 @@ import com.cursokotlin.imageslist.Model.ImageRandom
 import com.cursokotlin.imageslist.Model.urls
 import com.cursokotlin.imageslist.ui.theme.ImagesListTheme
 import kotlinx.coroutines.launch
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 
 
 class MainActivity : ComponentActivity() {
@@ -40,31 +46,56 @@ class MainActivity : ComponentActivity() {
         val vm = ImageClass()
 
         setContent {
-            val viewModel: ImageClass by viewModels()
 
-            var listaImagenes by remember{ mutableStateOf(listOf<ImageRandom>()) }
-            val isLoading by viewModel.isLoading().observeAsState()
 
             ImagesListTheme {
-
-                    BotonCallApi { item->
-                        /**
-                         * Aca va a obtener el imageslist de viewmodel con la lista modificada,
-                         * cuando cambie actualiza en listaImagenes
-                         */
-                        listaImagenes = viewModel.imagesListMutable
+            val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = Screen.MainScreen.route){
+                    composable(route = Screen.MainScreen.route){
 
 
-                        println(viewModel.imagesListMutable)
+                        //MainScreen(navController = navController)
+                        val viewModel: ImageClass by viewModels()
+                        var listaImagenes by remember{ mutableStateOf(listOf<ImageRandom>()) }
+                        val isLoading by viewModel.isLoading().observeAsState()
+
+                        BotonCallApi { item->
+                            println("item" + item)
+                            println(item)
+                                /**
+                                 * Aca va a obtener el imageslist de viewmodel con la lista modificada,
+                                 * cuando cambie actualiza en listaImagenes
+                                 */
+                                listaImagenes = viewModel.imagesListMutable
+
+                            }
+                            /**
+                             * renderizo el listado de imagenes
+                             */
+
+                            isLoading?.let {
+                                ComponentListImage(viewModel.imagesListMutable, it, navController)
+                            }
+
+
+                        }
+
+                    //por la barra voy a recibir los argumentos como si fuera una url
+                    composable(route = Screen.DetailScreen.route + "/{name}",
+                        arguments = listOf(
+                            navArgument("name"){
+                                type = NavType.StringType
+                                defaultValue = "Holiss"
+                                nullable = true
+                            }
+                        )
+                        ){ entry ->
+                        DetailScreen(listaImagenes = entry.arguments?.getString("name").toString())
                     }
-                /**
-                 * renderizo el listado de imagenes
-                 */
 
-                isLoading?.let { ComponentListImage(viewModel.imagesListMutable, it) }
-
-
+                }
             }
+
         }
     }
 }
@@ -72,6 +103,8 @@ class MainActivity : ComponentActivity() {
 @Preview(showSystemUi = true)
 @Composable
 fun DefaultPreview() {
+    val navController = rememberNavController()
+
     var imagesList = listOf(
         ImageRandom(
             "1",
@@ -86,7 +119,7 @@ fun DefaultPreview() {
             urls
         )
     )
-    ComponentListImage(imagesList,true)
+    ComponentListImage(imagesList,true,navController)
     BotonCallApi { item->
         println(item)
 
@@ -99,7 +132,7 @@ fun DefaultPreview() {
 @Composable
 fun ComponentListImage(
     imagesList: List<ImageRandom>,
-    isLoading: Boolean
+    isLoading: Boolean,navController: NavController
 //    vm: ImageClass
 ){
 
@@ -115,7 +148,7 @@ fun ComponentListImage(
         else{
             LazyColumn() {
                 items(imagesList) { img->
-                    imageListItem(img)
+                    imageListItem(img,navController)
                 }
             }
         }
@@ -127,7 +160,7 @@ fun ComponentListImage(
 }
 
 @Composable
-fun imageListItem(imageRandom : ImageRandom){
+fun imageListItem(imageRandom : ImageRandom, navController: NavController){
     val context = LocalContext.current
 
 
@@ -139,9 +172,16 @@ fun imageListItem(imageRandom : ImageRandom){
                 .fillMaxWidth()
                 .padding(8.dp)
                 .clickable {
+
                     Toast
-                        .makeText(context, "Hice click en ${imageRandom.urls.small}", Toast.LENGTH_SHORT)
+                        .makeText(
+                            context,
+                            "Hice click en ${imageRandom.urls.small}",
+                            Toast.LENGTH_SHORT
+                        )
                         .show()
+                    navController.navigate(Screen.DetailScreen.withArgs("Santiiiiiiiii"))
+
                 }
         ){
             Image(

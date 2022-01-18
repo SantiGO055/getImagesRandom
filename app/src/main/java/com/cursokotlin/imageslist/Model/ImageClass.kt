@@ -59,6 +59,7 @@ class ImageClass (): ViewModel() {
         viewModelScope.launch() {
             val env = System.getenv("config")
 
+            println("env")
             println(env)
             val call = getRetrofit().create(APIService::class.java)
                 .getRandomImage("random?client_id=okTUdfxNZJjAmiu8sirizJSXu9_1hfOiEtNyaAbyqGk&count=${Constants.count}")
@@ -70,7 +71,10 @@ class ImageClass (): ViewModel() {
 //                    imagesList = imageAux
 
                     imagesListMutable = imageAux
+
                     println("en la llamada a la api")
+
+                    println(imagesListMutable)
 
                     isLoading.postValue(false)
                     println(isLoading)

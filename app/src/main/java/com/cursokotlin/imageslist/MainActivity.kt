@@ -1,10 +1,12 @@
 package com.cursokotlin.imageslist
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +17,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -101,7 +104,6 @@ fun ComponentListImage(
 ){
 
 
-
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -111,7 +113,7 @@ fun ComponentListImage(
             CircularProgressIndicator()
         }
         else{
-            LazyColumn {
+            LazyColumn() {
                 items(imagesList) { img->
                     imageListItem(img)
                 }
@@ -126,6 +128,7 @@ fun ComponentListImage(
 
 @Composable
 fun imageListItem(imageRandom : ImageRandom){
+    val context = LocalContext.current
 
 
     Box(){
@@ -135,6 +138,11 @@ fun imageListItem(imageRandom : ImageRandom){
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
+                .clickable {
+                    Toast
+                        .makeText(context, "Hice click en ${imageRandom.urls.small}", Toast.LENGTH_SHORT)
+                        .show()
+                }
         ){
             Image(
                 painter = rememberImagePainter(data = imageRandom.urls.small),
@@ -172,7 +180,6 @@ fun BotonCallApi(
 
                             viewModel.getRandomImageApi()
                             onListChange(viewModel.imagesListMutable)
-
 
                         }
 

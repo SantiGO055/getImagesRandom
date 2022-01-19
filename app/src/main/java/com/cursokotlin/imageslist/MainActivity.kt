@@ -14,22 +14,17 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Lifecycle.State
-import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
-import com.bumptech.glide.load.engine.Resource
 import com.cursokotlin.imageslist.Model.ImageClass
 import com.cursokotlin.imageslist.Model.ImageRandom
 import com.cursokotlin.imageslist.Model.urls
@@ -44,39 +39,43 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val vm = ImageClass()
+        val viewModel: ImageClass by viewModels()
 
         setContent {
 
 
             ImagesListTheme {
-            val navController = rememberNavController()
+
+                val navController = rememberNavController()
+
                 NavHost(navController = navController, startDestination = Screen.MainScreen.route){
                     composable(route = Screen.MainScreen.route){
 
+                        HomeScreen(navController = navController,viewModel)
 
-                        //MainScreen(navController = navController)
-                        val viewModel: ImageClass by viewModels()
-                        var listaImagenes by remember{ mutableStateOf(listOf<ImageRandom>()) }
-                        val isLoading by viewModel.isLoading().observeAsState()
-
-                        BotonCallApi { item->
-                            println("item" + item)
-                            println(item)
-                                /**
-                                 * Aca va a obtener el imageslist de viewmodel con la lista modificada,
-                                 * cuando cambie actualiza en listaImagenes
-                                 */
-                                listaImagenes = viewModel.imagesListMutable
-
-                            }
-                            /**
-                             * renderizo el listado de imagenes
-                             */
-
-                            isLoading?.let {
-                                ComponentListImage(viewModel.imagesListMutable, it, navController)
-                            }
-
+                       //region Pase esto al componente HomeScreen
+//                        val viewModel: ImageClass by viewModels()
+//                        var listaImagenes by remember{ mutableStateOf(listOf<ImageRandom>()) }
+//                        val isLoading by viewModel.isLoading().observeAsState()
+//
+//                        BotonCallApi { item->
+//                            println("item" + item)
+//                            println(item)
+//                                /**
+//                                 * Aca va a obtener el imageslist de viewmodel con la lista modificada,
+//                                 * cuando cambie actualiza en listaImagenes
+//                                 */
+//                                listaImagenes = viewModel.imagesListMutable
+//
+//                            }
+//                            /**
+//                             * renderizo el listado de imagenes
+//                             */
+//
+//                            isLoading?.let {
+//                                ComponentListImage(viewModel.imagesListMutable, it, navController)
+//                            }
+//endregion
 
                         }
 
@@ -92,7 +91,6 @@ class MainActivity : ComponentActivity() {
                         ){ entry ->
                         DetailScreen(listaImagenes = entry.arguments?.getString("name").toString())
                     }
-
                 }
             }
 
@@ -100,6 +98,35 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Composable
+fun HomeScreen(navController: NavController, viewModel: ImageClass){
+
+    var listaImagenes by remember{ mutableStateOf(listOf<ImageRandom>()) }
+//    val listaPrueba by viewModel.imagesListPrueba().observeAsState()
+    val isLoading by viewModel.isLoading().observeAsState()
+
+    BotonCallApi(onListChange = {
+            item->
+                println("item" + item)
+                println(item)
+                /**
+                 * Aca va a obtener el imageslist de viewmodel con la lista modificada,
+                 * cuando cambie actualiza en listaImagenes
+                 */
+                viewModel.imagesListMutable = item
+
+                println("lista de boton api")
+                println(viewModel.imagesListMutable)
+    })
+    isLoading?.let {
+        ComponentListImage(viewModel.imagesListMutable, it, navController)
+    }
+    /**
+     * renderizo el listado de imagenes
+     */
+
+
+}
 @Preview(showSystemUi = true)
 @Composable
 fun DefaultPreview() {
@@ -120,10 +147,10 @@ fun DefaultPreview() {
         )
     )
     ComponentListImage(imagesList,true,navController)
-    BotonCallApi { item->
+    BotonCallApi(onListChange = {
+                                item->
         println(item)
-
-    }
+    })
 
 
 }
@@ -132,7 +159,8 @@ fun DefaultPreview() {
 @Composable
 fun ComponentListImage(
     imagesList: List<ImageRandom>,
-    isLoading: Boolean,navController: NavController
+    isLoading: Boolean,
+    navController: NavController
 //    vm: ImageClass
 ){
 

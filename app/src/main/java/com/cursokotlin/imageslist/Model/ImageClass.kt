@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import io.github.cdimascio.dotenv.dotenv
+import kotlin.reflect.KProperty
 
 var urls: Urls = Urls("https://images.unsplash.com/photo-1640984342197-ef90c8ee2974?ixid=MnwyODExMTh8MHwxfHJhbmRvbXx8fHx8fHx8fDE2NDE5MDgwNzU&ixlib=rb-1.2.1",
     "https://images.unsplash.com/photo-1640984342197-ef90c8ee2974?crop=entropy&cs=srgb&fm=jpg&ixid=MnwyODExMTh8MHwxfHJhbmRvbXx8fHx8fHx8fDE2NDE5MDgwNzU&ixlib=rb-1.2.1&q=85",
@@ -46,6 +47,7 @@ class ImageClass (): ViewModel() {
         )
     )
     var imagesListMutable by mutableStateOf(imagesList)
+
     private val isLoading = MutableLiveData(false)
     fun isLoading(): LiveData<Boolean> = isLoading
 
@@ -68,7 +70,7 @@ class ImageClass (): ViewModel() {
 
                 if (imageAux != null) {
 
-//                    imagesList = imageAux
+                    imagesList = imageAux
 
                     imagesListMutable = imageAux
 
@@ -98,3 +100,4 @@ class ImageClass (): ViewModel() {
             .build()
     }
 }
+
